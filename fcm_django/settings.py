@@ -1,21 +1,5 @@
 from django.conf import settings
 
-
-DEBUG = True
-
-SECRET_KEY = 'fake-key'
-
-INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'fcm_django'
-]
-
-
-
-
-
 FCM_DJANGO_SETTINGS = getattr(settings, "FCM_DJANGO_SETTINGS", {})
 
 # FCM
