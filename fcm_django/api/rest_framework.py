@@ -10,7 +10,7 @@ from fcm_django.settings import FCM_DJANGO_SETTINGS as SETTINGS
 
 
 # Django 2 and 1 compatibility layer
-def is_user_authenticated(self, user):
+def is_user_authenticated(user):
     """ Django 2 and 1 compatibility layer.
 
     Arguments:
@@ -65,7 +65,7 @@ class UniqueRegistrationSerializerMixin(Serializer):
                     .exclude(id=primary_key)
                 if (attrs["active"]):
                     devices.filter(~Q(user=user)).update(active=False)
-                devices = devices.filter(user=user, active=True)
+                devices = devices.filter(user=user)
             else:
                 devices = Device.objects.filter(
                     registration_id=attrs["registration_id"]) \
@@ -105,25 +105,15 @@ class DeviceViewSetMixin(object):
     lookup_field = "registration_id"
 
     def perform_create(self, serializer):
-        if self.request.is_user_authenticated(user):
+        if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
-
-            if (SETTINGS["ONE_DEVICE_PER_USER"] and
-                    self.request.data.get('active', True)):
-                FCMDevice.objects.filter(user=self.request.user).update(
-                    active=False)
-
+            FCMDevice.objects.filter(user=self.request.user)
         return super(DeviceViewSetMixin, self).perform_create(serializer)
 
     def perform_update(self, serializer):
-        if self.request.is_user_authenticated(user):
+        if self.request.user.is_authenticated:
             serializer.save(user=self.request.user)
-
-            if (SETTINGS["ONE_DEVICE_PER_USER"] and
-                    self.request.data.get('active', False)):
-                FCMDevice.objects.filter(user=self.request.user).update(
-                    active=False)
-
+            FCMDevice.objects.filter(user=self.request.user)
         return super(DeviceViewSetMixin, self).perform_update(serializer)
 
 
